@@ -38,6 +38,9 @@ The previous ROS release, which mainly developed for jaco arm will be named as *
 #### New in release 1.2.1
 A few bug fixes:
 
+Compilation on ARM Processors [wrzaskun]
+- Compilation for ARM Processors works.
+
 Specific to 7 dof robot:
 - PID controller parameters for the 7 dof robot with spherical wrist (before, the Gazebo model was unstable when launched)
 - addition of an is7dof argument in kinova_gazebo/launch/robot_launch.launch and kinova_control/launch/kinova_control.launch to load joint_7_position_controller in addition to other position_controllers when launching the gazebo model with use_trajectory_controller set to false and a 7 dof robot. This argument has to be set to true for a 7 dof robot. 
@@ -107,6 +110,9 @@ To make kinova-ros part of your workspace, follow these steps (assuming your wor
 ```
 cd ~/catkin_ws/src
 git clone https://github.com/Kinovarobotics/kinova-ros.git kinova-ros
+```
+Add row in ~/catkin_ws/src/@CMakeLists.txt <code> add_compile_options(-std=c++11) or add_compile_options(-std=c++14) </code> for SharedPointers [wrzaskun].
+```
 cd ~/catkin_ws
 catkin_make
 ```
