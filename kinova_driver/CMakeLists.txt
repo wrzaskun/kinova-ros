@@ -32,6 +32,14 @@ catkin_package(
 ## Build ##
 ###########
 
+install(FILES
+  launch/kinova_prezentacja.launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+  
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -113,6 +121,10 @@ add_executable(kinova_interactive_control src/nodes/kinova_interactive_control.c
 add_dependencies(kinova_interactive_control ${catkin_EXPORTED_TARGETS})
 target_link_libraries(kinova_interactive_control ${catkin_LIBRARIES} kinova_driver)
 
+add_executable(kinova_interactive_control_with_check src/nodes/kinova_interactive_control_with_check.cpp)
+add_dependencies(kinova_interactive_control_with_check ${catkin_EXPORTED_TARGETS})
+target_link_libraries(kinova_interactive_control_with_check ${catkin_LIBRARIES} kinova_driver)
+
 #############
 ## Install ##
 #############
@@ -135,6 +147,14 @@ install(DIRECTORY include/${PROJECT_NAME}/
 ## Mark executables and/or libraries for installation
 install(TARGETS kinova_arm_driver kinova_tf_updater
 kinova_interactive_control
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark executables and/or libraries for installation
+install(TARGETS kinova_arm_driver kinova_tf_updater
+kinova_interactive_control_with_check
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
