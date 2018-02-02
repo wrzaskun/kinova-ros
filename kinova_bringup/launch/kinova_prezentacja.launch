@@ -1,0 +1,17 @@
+<launch>
+  
+    <!-- Launch Files -->
+    <include file="$(find kinova_bringup)/launch/kinova_robot.launch">
+      <arg name="kinova_robotType" value="j2n6s300"/>
+      </include>
+      
+    <!-- Run Files for proxy-->
+    <node pkg="interactive_marker_proxy" type="proxy" name="proxy" args="topic_ns:=/j2n6s300_interactive_control_Cart target_frame:=/j2n6s300_link_base" output="screen" />
+    
+    <!-- sockets -->
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+    <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" output="screen" />
+    
+    <!-- <node pkg="kinova_driver" type="kinova_interactive_control" name="kinova_interactive_control" output="screen" /> not work-->
+    
+</launch>
