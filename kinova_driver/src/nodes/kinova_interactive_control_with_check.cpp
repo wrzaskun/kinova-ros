@@ -141,7 +141,7 @@ void make1DofMarker(const std::string& frame_id, const std::string& axis, unsign
 
 
 // %Tag(6DOF)%
-
+/* Set position marker */
 void make6DofMarker(bool fixed, unsigned int interaction_mode, const tf::Pose pose, bool show_6dof) {
     InteractiveMarker int_marker;
     int_marker.header.frame_id = tf_prefix_ + "_link_base";
@@ -202,7 +202,7 @@ void make6DofMarker(bool fixed, unsigned int interaction_mode, const tf::Pose po
     armPose_interMark_server->setCallback(int_marker.name, &processFeedback);
 
 }
-
+/* center of arm marker */
 void make6DofMarkerTarget(bool fixed, unsigned int interaction_mode, const tf::Pose pose, bool show_6dof) {
     InteractiveMarker int_marker;
     int_marker.header.frame_id = tf_prefix_ + "_link_base";
@@ -484,7 +484,8 @@ bool isIdentical(const kinova::KinovaPose &in, const kinova_msgs::KinovaPoseCons
 void currentPoseFeedback(const kinova_msgs::KinovaPoseConstPtr pose_command) {
     /* to jest wywoływane czały czas 10 x na sekunde */
     
-    //to stop applyChanges(), every frame if not needed because flooding the web browswer
+    //to stop applyChanges(), every frame if not needed because flooding the web browser
+    //check if actuator is not on the same position like target ball marker.
     if (!isIdentical(current_pose_command, pose_command)) { 
         current_pose_command.X = pose_command->X;
         current_pose_command.Y = pose_command->Y;
@@ -515,12 +516,13 @@ void currentPoseFeedback(const kinova_msgs::KinovaPoseConstPtr pose_command) {
         }
 
         InteractiveMarker marker;
-        if (armPose_interMark_server->get("TEST", marker)) {
-
+        if (armPose_interMark_server->get("TEST", marker)) { //center of arm marker called TEST
+            //pose_command is a position of actuator center and set new pose to TEST marker
             marker.pose.position.x = pose_command->X;
             marker.pose.position.y = pose_command->Y;
             marker.pose.position.z = pose_command->Z;
 
+            //check if TEST and cartesian_6dof markers are near in range 1% (0.01) 
             if (areValuesClose(pose_target_point_marker.pose.position.x, marker.pose.position.x, 0.01) &&
                     areValuesClose(pose_target_point_marker.pose.position.y, marker.pose.position.y, 0.01) &&
                     areValuesClose(pose_target_point_marker.pose.position.z, marker.pose.position.z, 0.01)
@@ -571,29 +573,15 @@ void currentPoseFeedback(const kinova_msgs::KinovaPoseConstPtr pose_command) {
 /// \return
 /// 
 
-void menuFeedback(const geometry_msgs::PoseStamped &menu) {
-
-    std::cout << menu.pose.orientation.w << "\n";
-    ArmPose_actionlibClient client("/" + tf_prefix_ + "_driver/pose_action/tool_pose", true);
-    kinova_msgs::ArmPoseGoal goal;
-    client.waitForServer();
-    //Tu wpisać pozycje 
-    goal.pose = menu;
-
-    ROS_INFO_STREAM("Goal parent frame is : " << goal.pose.header.frame_id);
-
-    ROS_INFO_STREAM("Goal to arm pose actionlib: \n"
-            << "  x: " << goal.pose.pose.position.x
-            << ", y: " << goal.pose.pose.position.y
-            << ", z: " << goal.pose.pose.position.z
-            << ", qx: " << goal.pose.pose.orientation.x
-            << ", qy: " << goal.pose.pose.orientation.y
-            << ", qz: " << goal.pose.pose.orientation.z
-            << ", qw: " << goal.pose.pose.orientation.w << std::endl);
-
-    client.sendGoal(goal);
+void menuFeedback(const geometry_msgs::PoseStamped &menu){   
+InteractiveMarker marker;
+        //set the target marker to home possition
+        if (armPose_interMark_server->get("cartesian_6dof", marker)) { //find marker name cartesian_6dof and copy
+            marker.pose = menu.pose;
+            armPose_interMark_server->insert(marker);
+            armPose_interMark_server->applyChanges();
+           }
 }
-
 int main(int argc, char** argv) {
     // Retrieve the (non-option) argument:
     if ((argc <= 1) || (argv[argc - 1] == NULL)) // there is NO input...
